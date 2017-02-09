@@ -3,7 +3,7 @@ package challenge
 import (
 	"context"
 	"encoding/json"
-	"github.com/soider/go-challenge/challenge/entities"
+	"github.com/soider/go-challenge/entities"
 	"github.com/soider/go-challenge/logger"
 	"net/http"
 )

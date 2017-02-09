@@ -21,6 +21,7 @@ func insert(root *node, value int) *node {
 	if root == nil {
 		return newNode(value)
 	}
+	// No equals branch prevents from doubles
 	if value < root.value {
 		root.left = insert(root.left, value)
 	} else if value > root.value {

@@ -9,7 +9,7 @@ import (
 	"github.com/soider/go-challenge/logger"
 	"net/http"
 	"time"
-	"github.com/soider/go-challenge/challenge/entities"
+	"github.com/soider/go-challenge/entities"
 )
 
 
