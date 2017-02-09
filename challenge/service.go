@@ -7,8 +7,10 @@ import (
 	"sync"
 )
 
+// FetchFunction type for fetching functions
 type FetchFunction func(ctx context.Context, target string, resultChan chan []int)
 
+// NumberService fetchs remote numbers. merge them and sorts
 type NumberService struct {
 	tick               chan []int
 	done               chan struct{}
@@ -17,9 +19,11 @@ type NumberService struct {
 	fetcher            FetchFunction
 	data               *tree.Tree
 	wg                 sync.WaitGroup
+	workers            int
 }
 
-func NewService(sanitizer UrlsSanitizer) *NumberService {
+// NewService constructor
+func NewService(sanitizer UrlsSanitizer, workers int) *NumberService {
 	return &NumberService{
 		sanitizer:          sanitizer,
 		tick:               make(chan []int),
@@ -27,15 +31,20 @@ func NewService(sanitizer UrlsSanitizer) *NumberService {
 		perTargetResultsCh: make(chan []int),
 		data:               tree.New(),
 		fetcher:            Fetch,
+		workers:            workers,
 	}
 }
 
+// Start starts the process
 func (ns *NumberService) Start(ctx context.Context) {
 	urlsCh := ns.sanitizer.SanitizedUrls(ctx)
 	go ns.responseCollector(ctx)
-	for target := range urlsCh {
-		ns.wg.Add(1)
-		go ns.fetch(ctx, target)
+	ns.wg.Add(ns.workers)
+	for i := 0; i < ns.workers; i++ {
+		go func() {
+			ns.fetch(ctx, urlsCh)
+			ns.wg.Done()
+		}()
 	}
 	go ns.waiter(ctx)
 }
@@ -45,10 +54,12 @@ func (ns *NumberService) waiter(ctx context.Context) {
 	close(ns.done)
 }
 
-func (ns *NumberService) fetch(ctx context.Context, target string) {
-	defer ns.wg.Done()
-	ns.fetcher(ctx, target, ns.perTargetResultsCh)
+func (ns *NumberService) fetch(ctx context.Context, ch chan string) {
+	for target := range ch {
+		ns.fetcher(ctx, target, ns.perTargetResultsCh)
+	}
 }
+
 func (ns *NumberService) responseCollector(ctx context.Context) {
 	for {
 		select {
@@ -68,9 +79,12 @@ func (ns *NumberService) handleNewPart(newPart []int) {
 	ns.tick <- ns.data.ToSlice()
 }
 
+// Tick returns tick channel
 func (ns *NumberService) Tick() chan []int {
 	return ns.tick
 }
+
+// Done returns done channel
 func (ns *NumberService) Done() chan struct{} {
 	return ns.done
 }

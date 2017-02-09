@@ -22,8 +22,8 @@ func TestUrlTestPassesOnlyValids(t *testing.T) {
 	urls = append(urls, brokenUrls...)
 	urlList := UrlsSanitizer(urls)
 	for url := range urlList.SanitizedUrls(context.Background()) {
-		for _, brokenUrl := range brokenUrls {
-			if url != brokenUrl {
+		for _, brokenURL := range brokenUrls {
+			if url != brokenURL {
 				continue
 			}
 			t.Fatalf("Broken url passed the UrlsSanitizer validation: %v", url)

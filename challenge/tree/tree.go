@@ -5,7 +5,7 @@ type Tree struct {
 	root *node
 }
 
-// sNew builds new avl tree
+// New builds new avl tree
 func New() *Tree {
 	return &Tree{}
 }

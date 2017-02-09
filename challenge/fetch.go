@@ -8,7 +8,7 @@ import (
 	"net/http"
 )
 
-
+// Fetch default fetcher
 func Fetch(ctx context.Context, target string, resultChan chan []int) {
 	ctx, cancel := context.WithCancel(ctx)
 	errCh := make(chan error, 1)
