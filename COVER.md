@@ -7,9 +7,9 @@ Timeouts
 First of all, timeout for handler is 500ms.
 I used standard context.Context structure with setted deadline, but I can't protected the whole code with this timeout, at least I would have to write answer to ResponseWriter with results I'd have at the moment of timeout expiration.
 Because of it, I'd come to the next scheme:
-    - I have only one handler in the service.
-    - Business related logic totally protected by context Timeout, by default 450 ms.
-    - Remained 50ms are for encoding json and writing answer. I can decrease this value, by serializing each intermediate result, but I afraid it would cost a much and it wouldn't give much.
+- I have only one handler in the service.
+- Business related logic totally protected by context Timeout, by default 450 ms.
+- Remained 50ms are for encoding json and writing answer. I can decrease this value, by serializing each intermediate result, but I afraid it would cost a much and it wouldn't give much.
 As far as I know, go lang program running on standard linux kernel can't guarantee hard real-time timeouts and all this stuff is the max that we can get from user-space software.
 
 Urls
@@ -45,16 +45,16 @@ Each fetcher also guarded by wait group.
 Architecture
 ============
 There are following entities:
-    - handler is for serving http requests.
-    - Service is structure with business related logic (downloading and merging).
-    - Url sanitizer is for skipping invalid urls and prevent doubles.
-    - Fetcher func is for fetching remote numbers.
-    - AVL tree is for storing results.
-    - Response object is for encoding and decoding json.
+- handler is for serving http requests.
+- Service is structure with business related logic (downloading and merging).
+- Url sanitizer is for skipping invalid urls and prevent doubles.
+- Fetcher func is for fetching remote numbers.
+- AVL tree is for storing results.
+- Response object is for encoding and decoding json.
 On each incoming request, handler creates instances of url sanitizer and service.
-Service starts downloading pipeline, providing two channels for listeting on to the handler:
-    - Done channel. This channel would be closed after processing each url.
-    - Tick channel. This channel get messages with []int after each new chunk of numbers completed.
+Service starts downloading pipeline, providing two channels for listening on to the handler:
+- Done channel. This channel would be closed after processing each url.
+- Tick channel. This channel get messages with []int after each new chunk of numbers completed.
 Handler use select for listening on this channels and also ctx.Done for handling timeout.
 On each Tick message, handler stores the received []int in response object.
 If ctx.Done or service.Done happened, handler encodes response object and write response to the RW.
